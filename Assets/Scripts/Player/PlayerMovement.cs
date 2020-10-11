@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -14,10 +12,10 @@ public class PlayerMovement : MonoBehaviour
     public float groundDistance;
     public LayerMask groundMask;
 
+    private static Vector3 moveTo;
 
     private Vector3 velocity;
     private bool isGrounded;
-
 
     void Update()
     {
@@ -26,10 +24,26 @@ public class PlayerMovement : MonoBehaviour
         HandleJump();
 
         Movement();
+    }
 
+    void FixedUpdate()
+    {
         velocity.y += gravity * Time.deltaTime;
+        if (moveTo.magnitude == 0)
+        {
+            controller.Move(velocity * Time.deltaTime);
+        }
+        else
+        {
+            var playerTransform = GetComponentInParent<Transform>();
+            playerTransform.SetPositionAndRotation(moveTo, playerTransform.rotation);
+            moveTo = default;
+        }
+    }
 
-        controller.Move(velocity * Time.deltaTime);
+    public static void SetCharacterPosition(Vector3 position)
+    {
+        moveTo = position;
     }
 
     private void Movement()
@@ -38,8 +52,7 @@ public class PlayerMovement : MonoBehaviour
         float z = Input.GetAxis("Vertical");
 
         Vector3 moveVector = transform.right * x + transform.forward * z;
-
-        controller.Move(moveVector * speed * Time.deltaTime);
+            controller.Move(moveVector * speed * Time.deltaTime);
     }
 
     private void GroundCheck()
